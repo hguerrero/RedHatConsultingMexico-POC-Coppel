@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camel="http://camel.apache.org/schema/spring"
+	xmlns:cxf="http://camel.apache.org/schema/cxf"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://camel.apache.org/schema/spring
+          http://camel.apache.org/schema/spring/camel-spring.xsd
+        http://camel.apache.org/schema/cxf
+          http://camel.apache.org/schema/cxf/camel-cxf.xsd">
+          
+		<cxf:cxfEndpoint id="WS" 
+		address="http://10.44.172.54:20215/connect/aida" 
+		serviceClass="aidaban.resources.wsdl.aida.AidaService">
+			<cxf:outInterceptors>
+	            <ref bean="loggingOutInterceptor"/>
+	        </cxf:outInterceptors>
+	        <cxf:inInterceptors>
+	            <ref bean="loggingInInterceptor"/>
+	        </cxf:inInterceptors>
+		</cxf:cxfEndpoint>
+
+	<bean id="spf" class="mx.com.redhat.consulting.coppel.poc.CoppelServerPipelineFactory"/>
+	<bean id="cpf" class="mx.com.redhat.consulting.coppel.poc.CoppelClientPipelineFactory"/>
+	<bean id="fakeProcessor" class="mx.com.redhat.consulting.coppel.poc.FakeProcess"/>
+	<bean id="coppelInputProcessor" class="mx.com.redhat.consulting.coppel.poc.CoppelInputProcessor"/>
+	<bean id="coppelOutputProcessor" class="mx.com.redhat.consulting.coppel.poc.CoppelOutputProcessor"/>
+	
+	<bean id="coppelCsvInputRequestProcessor" class="mx.com.redhat.consulting.coppel.poc.CoppelCsvInputRequestProcessor"/>
+	<bean id="coppelCsvOutputRequestProcessor" class="mx.com.redhat.consulting.coppel.poc.CoppelCsvOutputRequestProcessor"/>
+	<bean id="coppelCsvInputResponseProcessor" class="mx.com.redhat.consulting.coppel.poc.CoppelCsvInputResponseProcessor"/>
+	<bean id="coppelCsvOutputResponseProcessor" class="mx.com.redhat.consulting.coppel.poc.CoppelCsvOutputResponseProcessor"/>
+	
+	<bean id="coppelCryptProcessor" class="mx.com.redhat.consulting.coppel.poc.CoppelCipherProcessor">
+		<property name="keystoreFilename" value="/home/syspruebasbanco/security/baul.jck" />
+		<property name="storePassword" value="hola123" />
+		<property name="aliasPrivateKey" value="llaveSimetricaCoppel" />
+		<property name="privateKeyPassword" value="hola123Simetrica" />
+		<property name="encrypt" value="true" />
+    </bean>
+    <bean id="coppelDecryptProcessor" class="mx.com.redhat.consulting.coppel.poc.CoppelCipherProcessor">
+		<property name="keystoreFilename" value="/home/syspruebasbanco/security/baul.jck" />
+		<property name="storePassword" value="hola123" />
+		<property name="aliasPrivateKey" value="llaveSimetricaCoppel" />
+		<property name="privateKeyPassword" value="hola123Simetrica" />
+		<property name="encrypt" value="false" />
+    </bean>
+		
+    <bean id="activemq" class="org.apache.activemq.camel.component.ActiveMQComponent">
+       <property name="connectionFactory">
+          <bean class="org.apache.activemq.ActiveMQConnectionFactory">
+             <property name="brokerURL" value="vm://127.0.0.1"/>
+          </bean>
+       </property>
+    </bean>
+    
+     <bean id="elStrategy" class="org.apache.camel.dataformat.soap.name.TypeNameStrategy"/>
+    <bean id="enrich" class="mx.com.redhat.consulting.coppel.poc.ws.Enrich" />
+     <bean id="loggingOutInterceptor" class="org.apache.cxf.interceptor.LoggingOutInterceptor"/>
+    <bean id="loggingInInterceptor" class="org.apache.cxf.interceptor.LoggingInInterceptor"/>
+    
+    <camelContext id="bancoppelCamelContext" xmlns="http://camel.apache.org/schema/spring">
+    <dataFormats>
+        <jaxb contextPath="mx.com.redhat.consulting.coppel.poc.messages.request" prettyPrint="true" id="jaxbRequest"/>
+        <jaxb contextPath="mx.com.redhat.consulting.coppel.poc.messages.response" prettyPrint="true" id="jaxbResponse"/>
+        <soapjaxb contextPath="com.coppel.e03" elementNameStrategyRef="elStrategy" id="soapFormat"/>
+    </dataFormats>
+    <route id="bancoppel_fake">
+        <from uri="netty:tcp://0.0.0.0:22005?exchangePattern=InOut&amp;sync=true&amp;synchronous=true&amp;serverPipelineFactory=#spf"/>
+        <log message="${body}"/>
+        <process ref="fakeProcessor"/>
+    </route>
+    <route id="bancoppel_mq_roundtrip_SEND">
+        <from uri="netty:tcp://0.0.0.0:22007?exchangePattern=InOut&amp;sync=true&amp;synchronous=true&amp;serverPipelineFactory=#spf"/>
+        <process ref="coppelInputProcessor"/>
+        <process ref="coppelCsvInputRequestProcessor"/>
+        <unmarshal>
+            <bindy type="Csv" classType="mx.com.redhat.consulting.coppel.poc.messages.request.Mensaje90011Request"/>
+        </unmarshal>
+        <marshal ref="jaxbRequest"/>
+        <log message="xml peticion: ${body}"/>
+        <convertBodyTo type="java.lang.String"/>
+        <process ref="coppelCryptProcessor"/>
+        <to uri="activemq:req?jmsMessageType=Bytes"/>
+        <process ref="coppelDecryptProcessor"/>
+        <log message="xml respuesta: ${body}"/>
+        <unmarshal ref="jaxbResponse"/>
+        <marshal>
+            <bindy type="Csv" classType="mx.com.redhat.consulting.coppel.poc.messages.response.Mensaje90011Response"/>
+        </marshal>
+        <convertBodyTo type="java.lang.String"/>
+        <log message="despues del marshaling: ${body}"/>
+        <process ref="coppelCsvOutputResponseProcessor"/>
+    </route>
+    <route id="bancoppel_mq_roundtrip_REPLY">
+        <from uri="activemq:req"/>
+        <process ref="coppelDecryptProcessor"/>
+        <log message="xml peticion: ${body}"/>
+        <unmarshal ref="jaxbRequest"/>
+        <wireTap uri="file:///home/syspruebasbanco/request"/>
+        <marshal>
+            <bindy type="Csv" classType="mx.com.redhat.consulting.coppel.poc.messages.request.Mensaje90011Request"/>
+        </marshal>
+        <convertBodyTo type="java.lang.String"/>
+        <log message="despues del marshaling: ${body}"/>
+        <process ref="coppelCsvOutputRequestProcessor"/>
+        <process ref="coppelOutputProcessor"/>
+        <to uri="netty:tcp://10.44.172.140:22003?exchangePattern=InOut&amp;sync=true&amp;synchronous=true&amp;clientPipelineFactory=#cpf"/>
+        <process ref="coppelCsvInputResponseProcessor"/>
+        <log message="csv respuesta: ${body}"/>
+        <unmarshal>
+            <bindy type="Csv" classType="mx.com.redhat.consulting.coppel.poc.messages.response.Mensaje90011Response"/>
+        </unmarshal>
+        <marshal ref="jaxbResponse"/>
+        <log message="xml respuesta: ${body}"/>
+        <convertBodyTo type="java.lang.String"/>
+        <wireTap uri="file:///home/syspruebasbanco/response"/>
+        <process ref="coppelCryptProcessor"/>
+    </route>
+    <route id="aidabanService">
+        <from uri="timer://mike?fixedRate=true&amp;period=3000&amp;repeatCount=1"/>
+        <bean ref="enrich" method="createCustomer"/>
+        <log message="Peticion SOAP: ${body}"/>
+        <marshal ref="soapFormat"/>
+        <setHeader headerName="SOAPAction">
+            <constant>aida</constant>
+        </setHeader>
+        <log message="Peticion SOAP2: ${body}"/>
+        <to uri="cxf:bean:WS?dataFormat=MESSAGE"/>
+    </route>
+</camelContext>
+</beans>

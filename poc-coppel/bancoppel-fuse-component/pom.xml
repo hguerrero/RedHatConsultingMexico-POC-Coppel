@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.redhat.mx.consulting.fuse.coppel</groupId>
+		<artifactId>poc-bancoppel</artifactId>
+		<version>1.1.4</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>bancoppel-fuse-component</artifactId>
+	<name>Red Hat Consulting Mexico - JBoss Fuse :: Coppel :: PoC :: PoC-Bancoppel :: Bancoppel-fuse-component</name>
+	<packaging>bundle</packaging>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-spring</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-netty</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-csv</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-bindy</artifactId>
+		</dependency>
+		<dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-cxf</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-soap</artifactId>
+    </dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>${version.maven-bundle-plugin}</version>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Export-Package>mx.com.redhat.consulting.coppel.*,com.coppel.*,aidaban.resources.*</Export-Package>
+						<Private-Package>
+						</Private-Package>
+						<DynamicImport-Package>
+						org.apache.cxf.*,
+                        org.springframework.beans.*,
+                        
+                        *</DynamicImport-Package>
+						<Import-Package>
+						org.apache.camel.*,
+						mx.com.redhat.consulting.coppel.*,
+						org.apache.camel.component.netty.*,
+						com.coppel.*,aidaban.resources.*,
+						org.xmlsoap.schemas.soap.envelope;version=0,
+						*</Import-Package>
+						<Include-Resource>src/main/resources</Include-Resource>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
