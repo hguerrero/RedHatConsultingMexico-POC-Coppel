@@ -33,14 +33,14 @@
 	<bean id="coppelCsvOutputResponseProcessor" class="mx.com.redhat.consulting.coppel.poc.CoppelCsvOutputResponseProcessor"/>
 	
 	<bean id="coppelCryptProcessor" class="mx.com.redhat.consulting.coppel.poc.CoppelCipherProcessor">
-		<property name="keystoreFilename" value="/home/syspruebasbanco/security/baul.jck" />
+		<property name="keystoreFilename" value="c:\security\baul.jck" />
 		<property name="storePassword" value="hola123" />
 		<property name="aliasPrivateKey" value="llaveSimetricaCoppel" />
 		<property name="privateKeyPassword" value="hola123Simetrica" />
 		<property name="encrypt" value="true" />
     </bean>
     <bean id="coppelDecryptProcessor" class="mx.com.redhat.consulting.coppel.poc.CoppelCipherProcessor">
-		<property name="keystoreFilename" value="/home/syspruebasbanco/security/baul.jck" />
+		<property name="keystoreFilename" value="c:\security\baul.jck" />
 		<property name="storePassword" value="hola123" />
 		<property name="aliasPrivateKey" value="llaveSimetricaCoppel" />
 		<property name="privateKeyPassword" value="hola123Simetrica" />
@@ -50,12 +50,12 @@
     <bean id="activemq" class="org.apache.activemq.camel.component.ActiveMQComponent">
        <property name="connectionFactory">
           <bean class="org.apache.activemq.ActiveMQConnectionFactory">
-             <property name="brokerURL" value="vm://127.0.0.1"/>
+             <property name="brokerURL" value="tcp://10.44.172.52:61616"/>
           </bean>
        </property>
     </bean>
     
-     <bean id="elStrategy" class="org.apache.camel.dataformat.soap.name.TypeNameStrategy"/>
+    <bean id="elStrategy" class="org.apache.camel.dataformat.soap.name.TypeNameStrategy"/>
     <bean id="enrich" class="mx.com.redhat.consulting.coppel.poc.ws.Enrich" />
      <bean id="loggingOutInterceptor" class="org.apache.cxf.interceptor.LoggingOutInterceptor"/>
     <bean id="loggingInInterceptor" class="org.apache.cxf.interceptor.LoggingInInterceptor"/>
@@ -66,15 +66,16 @@
         <jaxb contextPath="mx.com.redhat.consulting.coppel.poc.messages.response" prettyPrint="true" id="jaxbResponse"/>
         <soapjaxb contextPath="com.coppel.e03" elementNameStrategyRef="elStrategy" id="soapFormat"/>
     </dataFormats>
-    <route id="bancoppel_fake">
+    <!--route id="bancoppel_fake">
         <from uri="netty:tcp://0.0.0.0:22005?exchangePattern=InOut&amp;sync=true&amp;synchronous=true&amp;serverPipelineFactory=#spf"/>
         <log message="${body}"/>
         <process ref="fakeProcessor"/>
-    </route>
+    </route> -->
     <route id="bancoppel_mq_roundtrip_SEND">
         <from uri="netty:tcp://0.0.0.0:22007?exchangePattern=InOut&amp;sync=true&amp;synchronous=true&amp;serverPipelineFactory=#spf"/>
         <process ref="coppelInputProcessor"/>
         <process ref="coppelCsvInputRequestProcessor"/>
+        <wireTap uri="seda:webService"/>
         <unmarshal>
             <bindy type="Csv" classType="mx.com.redhat.consulting.coppel.poc.messages.request.Mensaje90011Request"/>
         </unmarshal>
@@ -93,7 +94,7 @@
         <log message="despues del marshaling: ${body}"/>
         <process ref="coppelCsvOutputResponseProcessor"/>
     </route>
-    <route id="bancoppel_mq_roundtrip_REPLY">
+    <!--route id="bancoppel_mq_roundtrip_REPLY">
         <from uri="activemq:req"/>
         <process ref="coppelDecryptProcessor"/>
         <log message="xml peticion: ${body}"/>
@@ -106,7 +107,7 @@
         <log message="despues del marshaling: ${body}"/>
         <process ref="coppelCsvOutputRequestProcessor"/>
         <process ref="coppelOutputProcessor"/>
-        <to uri="netty:tcp://10.44.172.140:22003?exchangePattern=InOut&amp;sync=true&amp;synchronous=true&amp;clientPipelineFactory=#cpf"/>
+        <to uri="netty:tcp://0.0.0.0:22003?exchangePattern=InOut&amp;sync=true&amp;synchronous=true&amp;clientPipelineFactory=#cpf"/>
         <process ref="coppelCsvInputResponseProcessor"/>
         <log message="csv respuesta: ${body}"/>
         <unmarshal>
@@ -117,9 +118,9 @@
         <convertBodyTo type="java.lang.String"/>
         <wireTap uri="file:///home/syspruebasbanco/response"/>
         <process ref="coppelCryptProcessor"/>
-    </route>
+    </route> -->
     <route id="aidabanService">
-        <from uri="timer://mike?fixedRate=true&amp;period=3000&amp;repeatCount=1"/>
+        <from uri="seda:webService"/>
         <bean ref="enrich" method="createCustomer"/>
         <log message="Peticion SOAP: ${body}"/>
         <marshal ref="soapFormat"/>

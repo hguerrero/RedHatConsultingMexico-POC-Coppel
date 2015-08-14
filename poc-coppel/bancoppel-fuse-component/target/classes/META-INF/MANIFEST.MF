@@ -3,39 +3,39 @@ Export-Package: mx.com.redhat.consulting.coppel.poc;uses:="org.apache.
  camel,javax.crypto,org.slf4j,org.apache.camel.util,org.jboss.netty.bu
  ffer,org.jboss.netty.channel,org.jboss.netty.channel.group,org.apache
  .camel.component.netty,org.apache.camel.spi,org.apache.camel.componen
- t.netty.handlers",mx.com.redhat.consulting.coppel.poc.ws;uses:="javax
- .xml.bind.annotation,com.coppel.e03,org.apache.camel,javax.xml.bind,j
- avax.xml.namespace",mx.com.redhat.consulting.coppel.poc.messages.resp
- onse;uses:="org.apache.camel.dataformat.bindy.annotation,javax.xml.bi
- nd.annotation",mx.com.redhat.consulting.coppel.poc.messages.request;u
- ses:="org.apache.camel.dataformat.bindy.annotation,javax.xml.bind.ann
- otation",com.coppel.e03;uses:="mx.com.redhat.consulting.coppel.poc.ws
- ,javax.xml.bind.annotation",com.coppel.s03;uses:="javax.xml.bind.anno
- tation",aidaban.resources.wsdl.aida;uses:="javax.jws.soap,com.coppel.
- e03,com.coppel.s03,javax.jws,javax.xml.bind.annotation,javax.xml.ws,j
- avax.xml.namespace"
-Built-By: mmorales
+ t.netty.handlers",mx.com.redhat.consulting.coppel.poc.ws;uses:="com.c
+ oppel.e03,generated,org.apache.camel",mx.com.redhat.consulting.coppel
+ .poc.messages.response;uses:="org.apache.camel.dataformat.bindy.annot
+ ation,javax.xml.bind.annotation",mx.com.redhat.consulting.coppel.poc.
+ messages.request;uses:="javax.xml.bind.annotation,org.apache.camel.da
+ taformat.bindy.annotation",com.coppel.e03;uses:="generated,javax.xml.
+ bind.annotation",com.coppel.s03;uses:="generated,javax.xml.bind.annot
+ ation",aidaban.resources.wsdl.aida;uses:="javax.jws.soap,com.coppel.e
+ 03,com.coppel.s03,javax.jws,javax.xml.bind.annotation,javax.xml.ws,ja
+ vax.xml.namespace",generated;uses:="javax.xml.bind.annotation,javax.x
+ ml.bind.annotation.adapters,javax.xml.bind,javax.xml.namespace"
+Built-By: syspruebasbanco
 Tool: Bnd-1.15.0
 Bundle-Name: Red Hat Consulting Mexico - JBoss Fuse :: Coppel :: PoC :
  : PoC-Bancoppel :: Bancoppel-fuse-component
 Created-By: Apache Maven Bundle Plugin
 DynamicImport-Package: org.apache.cxf.*,org.springframework.beans.*,*
-Bundle-Version: 1.1.4
-Build-Jdk: 1.7.0_67
-Bnd-LastModified: 1415841533848
+Bundle-Version: 2.5.1
+Build-Jdk: 1.6.0_45
+Bnd-LastModified: 1438371165513
 Bundle-ManifestVersion: 2
 Import-Package: javax.crypto,javax.jws,javax.jws.soap,javax.xml.bind,j
- avax.xml.bind.annotation,javax.xml.namespace,javax.xml.ws,org.apache.
- activemq,org.apache.activemq.camel.component,org.apache.camel;version
- ="[2.12,3)",org.apache.camel.component.netty;version="[2.12,3)",org.a
- pache.camel.component.netty.handlers;version="[2.12,3)",org.apache.ca
- mel.dataformat.bindy.annotation;version="[2.12,3)",org.apache.camel.d
- ataformat.soap.name;version="[2.12,3)",org.apache.camel.spi;version="
- [2.12,3)",org.apache.camel.util;version="[2.12,3)",org.apache.cxf.int
- erceptor;version="[2.7,3)",org.jboss.netty.buffer;version="[3.8,4)",o
- rg.jboss.netty.channel;version="[3.8,4)",org.jboss.netty.channel.grou
- p;version="[3.8,4)",org.slf4j;version="[1.6,2)",org.xmlsoap.schemas.s
- oap.envelope;version=0
+ avax.xml.bind.annotation,javax.xml.bind.annotation.adapters,javax.xml
+ .namespace,javax.xml.ws,org.apache.activemq,org.apache.activemq.camel
+ .component,org.apache.camel;version="[2.12,3)",org.apache.camel.compo
+ nent.netty;version="[2.12,3)",org.apache.camel.component.netty.handle
+ rs;version="[2.12,3)",org.apache.camel.dataformat.bindy.annotation;ve
+ rsion="[2.12,3)",org.apache.camel.dataformat.soap.name;version="[2.12
+ ,3)",org.apache.camel.spi;version="[2.12,3)",org.apache.camel.util;ve
+ rsion="[2.12,3)",org.apache.cxf.interceptor;version="[2.7,3)",org.jbo
+ ss.netty.buffer;version="[3.8,4)",org.jboss.netty.channel;version="[3
+ .8,4)",org.jboss.netty.channel.group;version="[3.8,4)",org.slf4j;vers
+ ion="[1.6,2)",org.xmlsoap.schemas.soap.envelope;version=0
 Bundle-SymbolicName: com.redhat.mx.consulting.fuse.coppel.bancoppel-fu
  se-component
 

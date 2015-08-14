@@ -7,7 +7,7 @@
     <groupId>com.redhat.mx.consulting.fuse.coppel</groupId>
     <artifactId>poc</artifactId>
     <name>Red Hat Consulting Mexico - JBoss Fuse :: Coppel :: PoC</name>
-    <version>1.1.4</version>
+    <version>2.5.1</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -89,8 +89,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${version.compiler.plugin}</version>
                 <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
+                    <source>1.6</source>
+                    <target>1.6</target>
                 </configuration>
             </plugin>
         </plugins>
